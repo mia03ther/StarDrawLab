@@ -1,0 +1,3 @@
+# Local recovery copies may contain production credentials.
+.env.bak-*
+*.env.bak-*

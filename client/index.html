@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="stardraw-icons-loading">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Keep ligature names (e.g. `auto_awesome`) out of the first paint while
+         the Material Symbols font is being fetched. The element remains in
+         the layout, so revealing the icon does not move surrounding controls. */
+      html.stardraw-icons-loading .material-symbols-outlined {
+        visibility: hidden;
+      }
+      /* If the icon font is unavailable, keep the ligature text hidden and
+         render a neutral icon mark. This is preferable to flashing strings
+         such as `auto_awesome` on constrained networks. */
+      html.stardraw-icons-fallback .material-symbols-outlined {
+        position: relative;
+        width: 1em;
+        min-width: 1em;
+        overflow: hidden;
+        color: transparent !important;
+        white-space: nowrap;
+      }
+      html.stardraw-icons-fallback .material-symbols-outlined::after {
+        content: "";
+        position: absolute;
+        inset: 0.2em;
+        border: 0.09em solid currentColor;
+        border-radius: 0.22em;
+        color: #8f9095;
+      }
+    </style>
+    <script>
+      try {
+        document.documentElement.lang = localStorage.getItem("stardraw_locale") === "en" ? "en" : "zh-CN";
+      } catch {}
+    </script>
+    <title>StarDraw</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

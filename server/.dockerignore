@@ -1,0 +1,19 @@
+.env
+.env.*
+!.env.example
+*.bak
+*.backup
+*.log
+logs/
+tmp/
+node_modules/
+npm-debug.log*
+.git/
+.gitignore
+coverage/
+tests/
+docs/
+
+# Local development identity, mock providers and schema bootstrap stay off release images.
+development/
+.local/

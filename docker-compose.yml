@@ -1,0 +1,138 @@
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+
+  # ── Express API 后端 ────────────────────────
+  api:
+    image: "stardraw-server:${RELEASE_VERSION:-local}"
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      args:
+        RELEASE_VERSION: "${RELEASE_VERSION:-local}"
+        NPM_REGISTRY: "${NPM_REGISTRY:-https://registry.npmmirror.com}"
+    container_name: quickai_api
+    restart: unless-stopped
+    pids_limit: 256
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      LOG_DIR: /app/logs/api
+      IMAGE_PROVIDER_BASE_URL: "https://www.aimh8.com/agent/openapi/fpbrowser2api"
+    volumes:
+      # Mount the existing API log volume at the new API-specific directory so
+      # historical files remain available while Worker logs move elsewhere.
+      - api_logs:/app/logs/api
+      - api_tmp:/app/tmp
+      # Root-managed Skills are read-only inside the application container.
+      # Keep the host directory outside server/ so it cannot be uploaded via
+      # the application and cannot be written by the API process.
+      - ./skills:/app/skills:ro
+    networks:
+      - quickai_net
+    expose:
+      - "5000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    stop_grace_period: 30s
+    logging: *default-logging
+
+  # ── PostgreSQL 持久任务与支付补偿 Worker ────
+  worker:
+    # The worker reads tables introduced by migrations 025-041. Keep it out of
+    # a normal `docker compose up` until those migrations are explicitly
+    # verified, then start it with the `worker` profile and opt-in flag.
+    profiles: ["worker"]
+    image: "stardraw-server:${RELEASE_VERSION:-local}"
+    container_name: quickai_worker
+    restart: unless-stopped
+    pids_limit: 256
+    command: ["node", "workerEntry.js"]
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: production
+      LOG_DIR: /app/logs/worker
+      JOB_WORKER_ENABLED: "${JOB_WORKER_ENABLED:-false}"
+      WORKER_HEALTH_FILE: /app/tmp/worker-health.json
+      IMAGE_PROVIDER_BASE_URL: "https://www.aimh8.com/agent/openapi/fpbrowser2api"
+    volumes:
+      - worker_logs:/app/logs/worker
+      - api_tmp:/app/tmp
+      - ./skills:/app/skills:ro
+    networks:
+      - quickai_net
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "workerHealthcheck.js"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    stop_grace_period: 75s
+    logging: *default-logging
+
+  # ── Nginx 前端 + 反向代理 ────────────────────
+  web:
+    image: "stardraw-web:${RELEASE_VERSION:-local}"
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: "${NPM_REGISTRY:-https://registry.npmmirror.com}"
+        VITE_AUTHING_APP_ID: ${VITE_AUTHING_APP_ID}
+        VITE_AUTHING_DOMAIN: ${VITE_AUTHING_DOMAIN}
+        VITE_AUTHING_REDIRECT_URI: ${VITE_AUTHING_REDIRECT_URI}
+        VITE_AUTHING_LOGOUT_URI: ${VITE_AUTHING_LOGOUT_URI}
+        VITE_AUTH_PROVIDER: "${VITE_AUTH_PROVIDER:-authing}"
+        VITE_OIDC_ISSUER: "${VITE_OIDC_ISSUER:-}"
+        VITE_OIDC_CLIENT_ID: "${VITE_OIDC_CLIENT_ID:-}"
+        VITE_OIDC_RESOURCE: "${VITE_OIDC_RESOURCE:-}"
+        VITE_OIDC_REDIRECT_URI: "${VITE_OIDC_REDIRECT_URI:-}"
+        VITE_OIDC_LOGOUT_URI: "${VITE_OIDC_LOGOUT_URI:-}"
+        VITE_OIDC_DISCOVERY_URL: "${VITE_OIDC_DISCOVERY_URL:-}"
+        VITE_OIDC_SCOPES: "${VITE_OIDC_SCOPES:-openid profile email phone offline_access}"
+        VITE_BASE_URL: ""
+        VITE_RELEASE_VERSION: "${RELEASE_VERSION:-local}"
+        VITE_FEATURE_TASK_CENTER: "${VITE_FEATURE_TASK_CENTER:-true}"
+    container_name: quickai_web
+    restart: unless-stopped
+    pids_limit: 64
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - quickai_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+
+volumes:
+  api_logs:
+    driver: local
+  worker_logs:
+    driver: local
+  api_tmp:
+    driver: local
+
+networks:
+  quickai_net:
+    driver: bridge

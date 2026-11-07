@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Environment files (contains secrets!)
+.env
+.env.local
+.env.*.local
+server.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files (optional - uncomment if you want to exclude)
+# package-lock.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+/client/nginx.conf.bak
+
+# Local development database, credentials and runtime
+.local/

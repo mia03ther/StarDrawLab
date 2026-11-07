@@ -1,0 +1,49 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "server": "nodemon server.js",
+    "start": "node server.js",
+    "release:check": "node scripts/releasePreflight.js",
+    "release:db-check": "bash scripts/checkReleaseDatabase.sh",
+    "migration:apply": "node scripts/applyMigration.js",
+    "backup:postgres": "bash scripts/backupPostgresContainer.sh",
+    "templates:validate:awesome-gpt-image-2": "node scripts/importAwesomeGptImage2Templates.js --validate-only",
+    "templates:import:awesome-gpt-image-2": "node scripts/importAwesomeGptImage2Templates.js",
+    "skills:validate:clipcat": "node scripts/clipcatSkillImport.js --validate-only",
+    "skills:import:clipcat": "node scripts/clipcatSkillImport.js --apply",
+    "dev:local": "node development/start-local.cjs",
+    "test:local": "node development/test-local.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ali-oss": "^6.23.0",
+    "alipay-sdk": "^4.14.0",
+    "archiver": "^7.0.1",
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.3",
+    "jwks-rsa": "^4.0.1",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^9.0.4",
+    "node-cron": "^4.2.1",
+    "pdf-parse": "^1.1.1",
+    "postgres": "^3.4.8",
+    "sharp": "^0.34.3",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
