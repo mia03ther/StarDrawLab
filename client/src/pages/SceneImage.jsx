@@ -60,6 +60,8 @@ const SceneImage = () => {
   const requestedTemplateKey = searchParams.get("template")?.trim() || "";
   const requestedTemplateId = searchParams.get("template_id")?.trim() || "";
   const requestedRemixId = searchParams.get("remix")?.trim() || "";
+  const requestedPrompt = searchParams.get("prompt")?.trim() || "";
+  const physicalProduct = searchParams.get("product")?.trim() || "";
   const templateLaunchKey = requestedTemplateId
     ? `template-id:${requestedTemplateId}`
     : requestedTemplateKey
@@ -232,8 +234,9 @@ const SceneImage = () => {
           : rows);
         setImageModels(availableModels);
         setRemixSource(remix);
-        applyScene(preferredScene, { adoptStarterPrompt: true });
-        if (remix?.prompt_public && remix.prompt) setPrompt(remix.prompt);
+        applyScene(preferredScene, { adoptStarterPrompt: !requestedPrompt });
+        if (requestedPrompt) setPrompt(requestedPrompt);
+        else if (remix?.prompt_public && remix.prompt) setPrompt(remix.prompt);
         if (remix?.public_parameters?.visual_parameters) {
           setVisualParameters(remix.public_parameters.visual_parameters);
         }
@@ -243,7 +246,7 @@ const SceneImage = () => {
         }
       })
       .catch(() => toast.error(t("加载模板或模型失败", "Failed to load templates or models")));
-  }, [authAxios, applyScene, requestedRemixId, requestedTemplateId, requestedTemplateKey, t]);
+  }, [authAxios, applyScene, requestedRemixId, requestedTemplateId, requestedTemplateKey, requestedPrompt, t]);
 
   useEffect(() => {
     if (!selectedScene || !imageModels.length) return;
@@ -570,14 +573,18 @@ const SceneImage = () => {
                 {result.points_charged} {t("积分", "pts")} • {t("有效期至", "Expires")} {new Date(result.expires_at).toLocaleDateString(isZh ? "zh-CN" : "en-US")}
               </p>
             </div>
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95"
-              style={{ background: ui.buttonGradient, color: ui.primaryText, fontFamily: "Manrope, sans-serif" }}
-            >
-              <span className="material-symbols-outlined text-sm">download</span>
-              {t("下载无水印原图", "Download Without Watermark")}
-            </button>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              {physicalProduct && (
+                <button type="button" onClick={() => window.dispatchEvent(new Event("stardraw:open-custom-contact"))} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.primarySoft, color: ui.primary, border: `1px solid ${ui.primary}` }}>
+                  <span className="material-symbols-outlined text-sm">chat</span>
+                  {t(`提交${physicalProduct}定制意向`, `Request ${physicalProduct} quote`)}
+                </button>
+              )}
+              <button onClick={handleDownload} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.buttonGradient, color: ui.primaryText, fontFamily: "Manrope, sans-serif" }}>
+                <span className="material-symbols-outlined text-sm">download</span>
+                {t("下载无水印原图", "Download Without Watermark")}
+              </button>
+            </div>
           </div>
         </div>
       );

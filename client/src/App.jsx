@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import CustomerServiceQr from "./components/CustomerServiceQr";
 
 const Landing = lazy(() => import("./pages/Landing"));
+const PhysicalCustomMvp = lazy(() => import("./pages/PhysicalCustomMvp"));
 const AgentHome = lazy(() => import("./pages/AgentHome"));
 const Layout = lazy(() => import("./pages/Layout"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -85,6 +86,7 @@ const App = () => {
       <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/custom" element={<PhysicalCustomMvp />} />
         {/* Keep the legacy URL usable while the community feed lives on the home page. */}
         <Route path="/discover" element={<Navigate to="/home#community" replace />} />
         <Route

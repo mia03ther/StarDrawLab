@@ -172,6 +172,7 @@ export default function Landing() {
         <header className="landing-header">
           <Brand />
           <nav className="landing-nav" aria-label={t("主导航", "Primary navigation")}>
+            <Link to="/custom"><Sparkles size={14} />{t("照片定制", "Custom")}</Link>
             <Link to="/ai/scene-image"><ImageIcon size={14} />{t("图片生成", "Image")}</Link>
             <Link to="/ai/ai-video"><Film size={14} />{t("视频生成", "Video")}</Link>
             <Link to="/ai/canvas"><PanelsTopLeft size={14} />{t("智能画布", "Canvas")}</Link>

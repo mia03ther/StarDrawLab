@@ -38,6 +38,12 @@ const CustomerServiceQr = () => {
   const previewContact = CONTACTS.find((contact) => contact.id === previewContactId) || null;
 
   useEffect(() => {
+    const openSupport = () => setOpen(true);
+    window.addEventListener("stardraw:open-custom-contact", openSupport);
+    return () => window.removeEventListener("stardraw:open-custom-contact", openSupport);
+  }, []);
+
+  useEffect(() => {
     if (!previewContactId) return undefined;
 
     const handleKeyDown = (event) => {
