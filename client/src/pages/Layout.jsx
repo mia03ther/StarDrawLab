@@ -268,23 +268,15 @@ const Sidebar = ({ user, balance, logout, role, isAdmin, isRoot, authorizationLo
   <aside className="h-screen w-64 fixed left-0 top-0 flex flex-col z-50"
     style={{ background: ui.sidebar, borderRight: `1px solid ${ui.line}` }}>
     <div className="flex flex-col h-full py-6 px-4">
-      <div className="mb-10 px-2 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: ui.primary }}>
-          <span className="material-symbols-outlined filled text-sm"
-            style={{ color: ui.primaryText }}>architecture</span>
-        </div>
-        <div>
-          <h1 className="text-base font-bold tracking-tighter font-headline"
-            style={{ color: ui.text, fontFamily: "Manrope, sans-serif" }}>
-            StarDraw
-          </h1>
-          <p className="text-[9px] uppercase tracking-[0.18em] font-medium"
-            style={{ color: ui.muted, opacity: 0.65 }}>
-            {isZh ? "数字内容架构台" : "The Digital Architect"}
-          </p>
-        </div>
-      </div>
+      <button type="button" onClick={() => onNavigate("/")} className="mb-10 px-2 flex items-center gap-3 text-left transition-opacity hover:opacity-80" title={isZh ? "返回首页" : "Back to homepage"} aria-label={isZh ? "返回 StarDraw 首页" : "Back to StarDraw home"}>
+        <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: ui.primary }}>
+          <span className="material-symbols-outlined filled text-sm" style={{ color: ui.primaryText }}>architecture</span>
+        </span>
+        <span>
+          <span className="block text-base font-bold tracking-tighter font-headline" style={{ color: ui.text, fontFamily: "Manrope, sans-serif" }}>StarDraw</span>
+          <span className="block text-[9px] uppercase tracking-[0.18em] font-medium" style={{ color: ui.muted, opacity: 0.65 }}>{isZh ? "数字内容架构台" : "The Digital Architect"}</span>
+        </span>
+      </button>
 
       <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
         {getNavItems(isZh).map(({ to, label, icon }) => (

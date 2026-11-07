@@ -407,8 +407,10 @@ const SceneImage = () => {
       toast.error(t("这个模板需要参考图，请改选支持图片编辑的模型", "This template needs a reference image. Choose an image-edit model."));
       return;
     }
-    if (selectedScene.requires_reference && referenceFiles.length === 0) {
-      toast.error(t("这个模板至少需要上传一张参考图", "This template requires at least one reference image"));
+    if ((selectedScene.requires_reference || physicalProduct) && referenceFiles.length === 0) {
+      toast.error(physicalProduct
+        ? t("请先上传要做成实物的照片", "Upload the photo you want to turn into a product first")
+        : t("这个模板至少需要上传一张参考图", "This template requires at least one reference image"));
       return;
     }
     if (referenceFiles.length > 0 && !supportsReferenceImages) {
@@ -574,12 +576,10 @@ const SceneImage = () => {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-3">
-              {physicalProduct && (
-                <button type="button" onClick={() => window.dispatchEvent(new Event("stardraw:open-custom-contact"))} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.primarySoft, color: ui.primary, border: `1px solid ${ui.primary}` }}>
-                  <span className="material-symbols-outlined text-sm">chat</span>
-                  {t(`提交${physicalProduct}定制意向`, `Request ${physicalProduct} quote`)}
-                </button>
-              )}
+              <button type="button" onClick={() => window.dispatchEvent(new Event("stardraw:open-custom-contact"))} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.primarySoft, color: ui.primary, border: `1px solid ${ui.primary}` }}>
+                <span className="material-symbols-outlined text-sm">chat</span>
+                {physicalProduct ? t("扫码咨询报价", "Scan for a quote") : t("把这张作品做成实物", "Make this into a product")}
+              </button>
               <button onClick={handleDownload} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.buttonGradient, color: ui.primaryText, fontFamily: "Manrope, sans-serif" }}>
                 <span className="material-symbols-outlined text-sm">download</span>
                 {t("下载无水印原图", "Download Without Watermark")}
@@ -679,10 +679,10 @@ const SceneImage = () => {
     <div className="p-10 max-w-[1480px] mx-auto">
       <div className="mb-8">
         <h2 className="text-4xl font-extrabold mb-2" style={{ color: ui.text, fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
-          {t("AI 图片生成", "AI Image Generation")}
+          {physicalProduct ? t("生成你的实物设计预览", "Generate your product design preview") : t("AI 图片生成", "AI Image Generation")}
         </h2>
         <p className="text-lg max-w-3xl" style={{ color: ui.muted, opacity: 0.76 }}>
-          {t("可以直接填写提示词自由生成，也可以选择模板快速开始。", "Write your own prompt for a freeform generation, or choose a template to start faster.")}
+          {physicalProduct ? t(`已选择：${physicalProduct}。上传照片、确认提示词后生成；满意后点击“扫码咨询报价”。`, `Selected: ${physicalProduct}. Upload your photo, generate, then request a quote.`) : t("可以直接填写提示词自由生成，也可以选择模板快速开始。", "Write your own prompt for a freeform generation, or choose a template to start faster.")}
         </p>
       </div>
 
@@ -903,7 +903,7 @@ const SceneImage = () => {
             ) : (
               <>
                 <span className="material-symbols-outlined">bolt</span>
-                {t("生成图片", "GENERATE IMAGE")}
+                {physicalProduct ? t(`生成${physicalProduct}设计预览`, `Generate ${physicalProduct} preview`) : t("生成图片", "GENERATE IMAGE")}
               </>
             )}
           </button>
