@@ -19,7 +19,7 @@ const getStatusColors = (ui) => ({
   failed:    { color: ui.danger, bg: ui.dangerSoft },
 });
 
-const AssetCard = ({ item, selected, onToggle, onSingleDownload, onDelete, onAddToCanvas, onPreview, deletingId, ui }) => {
+const AssetCard = ({ item, selected, onToggle, onSingleDownload, onDelete, onAddToCanvas, onOrderQuote, onPreview, deletingId, ui }) => {
   const { t, isZh } = useLanguage();
   const isExpired  = item.expires_at && new Date(item.expires_at) < new Date();
   const canAct     = item.status === "completed" && !isExpired;
@@ -177,6 +177,21 @@ const AssetCard = ({ item, selected, onToggle, onSingleDownload, onDelete, onAdd
                   ? t("生成失败", "Failed")
                   : t("处理中…", "Processing…")}
           </button>
+          {canAct && item.type === "image" && (
+            <button
+              type="button"
+              onClick={() => onOrderQuote(item)}
+              className="w-full mt-2 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all active:scale-95"
+              style={{
+                background: ui.primarySoft,
+                color: ui.primary,
+                border: `1px solid ${ui.primary}66`,
+                fontFamily: "Manrope, sans-serif",
+              }}>
+              <span className="material-symbols-outlined text-sm">chat</span>
+              {t("把这张作品做成实物", "Make this into a product")}
+            </button>
+          )}
           {canAct && (
             <button
               onClick={() => onAddToCanvas(item)}
@@ -327,6 +342,10 @@ const History = () => {
   };
 
   const clearSelection = () => setSelected(new Set());
+
+  const handleOrderQuote = () => {
+    window.dispatchEvent(new Event("stardraw:open-custom-contact"));
+  };
 
   const handleSingleDownload = async (id) => {
     try {
@@ -560,6 +579,7 @@ const History = () => {
                 onToggle={toggleSelect}
                 onSingleDownload={handleSingleDownload}
                 onDelete={handleDelete}
+                onOrderQuote={handleOrderQuote}
 	                onPreview={setPreviewItem}
 	                onAddToCanvas={handleAddToCanvas}
 	                deletingId={deletingId}
