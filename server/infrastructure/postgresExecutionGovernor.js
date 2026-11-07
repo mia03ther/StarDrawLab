@@ -2,6 +2,17 @@ import { ExecutionGovernorPort } from "../ports/executionGovernorPort.js";
 
 const MAX_METADATA_BYTES = 64 * 1024;
 const VALID_TIERS = new Set(["free", "basic", "pro", "max", "enterprise"]);
+// Daily quotas are a spend/production control, not an Agent planning limit.
+// These are the only governor operations that may result in a new paid media
+// task. Read/save/plan/validation operations retain their normal short-term
+// rate and concurrency protection but never consume a daily generation slot.
+const DAILY_QUOTA_OPERATION_KEYS = new Set([
+  "generation.image",
+  "generation.video",
+  "media.generate.image",
+  "media.generate.video",
+  "workflow.run",
+]);
 
 const fail = (message, { status = 429, code = "EXECUTION_ADMISSION_DENIED", ...extra } = {}) => Object.assign(
   new Error(message),
@@ -138,10 +149,14 @@ export class PostgresExecutionGovernor extends ExecutionGovernorPort {
         }
       }
 
+      const dailyQuotaApplies = DAILY_QUOTA_OPERATION_KEYS.has(request.operationKey);
       const [counts] = await tx`
         SELECT
           COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '1 minute')::int AS minute_count,
-          COUNT(*) FILTER (WHERE created_at >= date_trunc('day', NOW()))::int AS daily_count,
+          COUNT(*) FILTER (
+            WHERE created_at >= (date_trunc('day', NOW() AT TIME ZONE 'Asia/Shanghai') AT TIME ZONE 'Asia/Shanghai')
+              AND state = 'completed'
+          )::int AS daily_count,
           COUNT(*) FILTER (WHERE state = 'running' AND (expires_at IS NULL OR expires_at > NOW()))::int AS concurrent_count,
           COUNT(*) FILTER (WHERE state IN ('queued', 'running'))::int AS queue_count
         FROM execution_governor_leases
@@ -154,7 +169,7 @@ export class PostgresExecutionGovernor extends ExecutionGovernorPort {
       const concurrentCount = Number(counts?.concurrent_count || 0);
       const queueCount = Number(counts?.queue_count || 0);
 
-      if (policy.dailyQuota > 0 && dailyCount >= policy.dailyQuota) {
+      if (dailyQuotaApplies && policy.dailyQuota > 0 && dailyCount >= policy.dailyQuota) {
         throw fail("Daily execution quota has been reached", {
           code: "DAILY_QUOTA_EXCEEDED",
           retryAfterSeconds: Math.max(1, Math.ceil((24 * 60 * 60 * 1000 - (Date.now() % (24 * 60 * 60 * 1000))) / 1000)),
