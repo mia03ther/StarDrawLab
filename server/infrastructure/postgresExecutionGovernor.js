@@ -2,16 +2,14 @@ import { ExecutionGovernorPort } from "../ports/executionGovernorPort.js";
 
 const MAX_METADATA_BYTES = 64 * 1024;
 const VALID_TIERS = new Set(["free", "basic", "pro", "max", "enterprise"]);
-// Daily quotas are a spend/production control, not an Agent planning limit.
-// These are the only governor operations that may result in a new paid media
-// task. Read/save/plan/validation operations retain their normal short-term
-// rate and concurrency protection but never consume a daily generation slot.
+// Daily quotas only protect direct generation API endpoints. Canvas and Agent
+// workflows already reserve points for each real media task; applying a second
+// daily counter there makes normal iterative creation fail before a provider
+// request is even made. Minute, queue and concurrency controls still apply to
+// every operation.
 const DAILY_QUOTA_OPERATION_KEYS = new Set([
   "generation.image",
   "generation.video",
-  "media.generate.image",
-  "media.generate.video",
-  "workflow.run",
 ]);
 
 const fail = (message, { status = 429, code = "EXECUTION_ADMISSION_DENIED", ...extra } = {}) => Object.assign(
