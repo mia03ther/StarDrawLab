@@ -329,6 +329,25 @@ const Dashboard = () => {
 
       {/* Quick access bento */}
       <section className="dashboard-bento grid grid-cols-12 gap-5 mb-14">
+        {/* Isolated physical-design MVP entry */}
+        <div className="dashboard-tool dashboard-tool-physical col-span-12 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
+          style={{ background: ui.card, border: `1px solid ${ui.lineSoft}`, boxShadow: ui.shadow }}
+          onClick={() => navigate("/design")}>
+          <div className="dashboard-physical-orbit" />
+          <div className="relative flex flex-col gap-6 p-7 md:flex-row md:items-center md:justify-between md:p-8">
+            <div className="flex items-center gap-5">
+              <div className="dashboard-physical-mark"><span>✦</span><i /></div>
+              <div>
+                <p className="dashboard-physical-kicker">NEW / PHYSICAL DESIGN</p>
+                <h3 className="text-2xl font-bold mb-1" style={{ color: ui.text, fontFamily: "Manrope, sans-serif" }}>{t("照片做成实物设计", "Photo-to-object design")}</h3>
+                <p className="text-sm max-w-xl" style={{ color: ui.muted, opacity: 0.82 }}>{t("独立内测入口：上传照片、选择风格与物品，先看设计预览，再人工确认打样和报价。", "An isolated preview flow: upload a photo, choose a style and object, then confirm sampling and pricing with a person.")}</p>
+              </div>
+            </div>
+            <button className="dashboard-physical-cta shrink-0 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2" style={{ color: "#29140a", fontFamily: "Manrope, sans-serif" }}>
+              {t("进入实物设计", "Open physical design")}<span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+          </div>
+        </div>
         {/* AI Image card */}
         <div className="dashboard-tool dashboard-tool-image col-span-12 lg:col-span-7 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
           style={{ background: ui.card, border: `1px solid ${ui.lineSoft}`, boxShadow: ui.shadow }}

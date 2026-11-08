@@ -80,8 +80,12 @@ const App = () => {
       <CustomerServiceQr />
       <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/custom" element={<PhysicalCustomMvp />} />
+        {/* Keep the established creation dashboard as the default product home.
+            The physical-design MVP is intentionally isolated behind its own entry. */}
+        <Route path="/" element={<Navigate to="/ai" replace />} />
+        <Route path="/design" element={<PhysicalCustomMvp />} />
+        <Route path="/custom" element={<Navigate to="/design" replace />} />
+        <Route path="/design/landing" element={<Landing />} />
         {/* Keep the legacy URL usable while the community feed lives on the home page. */}
         <Route path="/discover" element={<Navigate to="/home#community" replace />} />
         <Route
