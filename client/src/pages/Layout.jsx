@@ -69,29 +69,29 @@ const getStoredTheme = () => {
 
 const layoutThemes = {
   night: {
-    page: "#10141a",
-    canvasPage: "#0a0e14",
-    sidebar: "#181c22",
-    sidebarAlt: "#0a0e14",
-    surface: "#181c22",
-    surfaceAlt: "#0a0e14",
+    page: "#0d1117",
+    canvasPage: "#090d13",
+    sidebar: "rgba(17, 24, 31, 0.82)",
+    sidebarAlt: "rgba(10, 15, 21, 0.78)",
+    surface: "rgba(23, 30, 38, 0.74)",
+    surfaceAlt: "rgba(12, 17, 23, 0.72)",
     surfaceHigh: "#262a31",
-    header: "rgba(16,20,26,0.82)",
-    headerBorder: "rgba(69,71,75,0.18)",
+    header: "rgba(13,17,23,0.70)",
+    headerBorder: "rgba(255,255,255,0.10)",
     text: "#dfe2eb",
     muted: "#c2c7d0",
     faint: "#8f9095",
-    line: "rgba(69,71,75,0.18)",
-    lineStrong: "rgba(69,71,75,0.32)",
+    line: "rgba(255,255,255,0.10)",
+    lineStrong: "rgba(255,255,255,0.18)",
     primary: "#ee9d47",
     primarySoft: "rgba(238,157,71,0.14)",
     primaryText: "#2b1708",
     gold: "#e9c349",
     danger: "#ffb4ab",
-    navActiveBg: "#1c2026",
-    navHoverBg: "#1c2026",
-    menuBg: "rgba(24,28,34,0.98)",
-    shadow: "0 20px 48px rgba(0,0,0,0.34)",
+    navActiveBg: "rgba(240,157,71,0.13)",
+    navHoverBg: "rgba(255,255,255,0.055)",
+    menuBg: "rgba(20,27,35,0.92)",
+    shadow: "0 24px 70px rgba(0,0,0,0.36)",
   },
   day: {
     page: "#f7f5f0",
@@ -265,7 +265,7 @@ const UserMenu = ({ user, balance, role, isZh, t, onNavigate, onLogout, pathname
 };
 
 const Sidebar = ({ user, balance, logout, role, isAdmin, isRoot, authorizationLoading, isZh, t, pathname, onNavigate, ui }) => (
-  <aside className="h-screen w-64 fixed left-0 top-0 flex flex-col z-50"
+  <aside className="stardraw-sidebar h-screen w-64 fixed left-0 top-0 flex flex-col z-50"
     style={{ background: ui.sidebar, borderRight: `1px solid ${ui.line}` }}>
     <div className="flex flex-col h-full py-6 px-4">
       <button type="button" onClick={() => onNavigate("/")} className="mb-10 px-2 flex items-center gap-3 text-left transition-opacity hover:opacity-80" title={isZh ? "返回首页" : "Back to homepage"} aria-label={isZh ? "返回 StarDraw 首页" : "Back to StarDraw home"}>
@@ -282,7 +282,7 @@ const Sidebar = ({ user, balance, logout, role, isAdmin, isRoot, authorizationLo
         {getNavItems(isZh).map(({ to, label, icon }) => (
           <NavLink key={to} to={to} end={to === "/ai"}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl mx-1 transition-all duration-200 text-sm font-bold cursor-pointer select-none
+              `stardraw-nav-item flex items-center gap-3 px-4 py-3 rounded-xl mx-1 transition-all duration-200 text-sm font-bold cursor-pointer select-none
                ${isActive ? "scale-[0.97]" : ""}`
             }
             style={({ isActive }) => ({
@@ -319,7 +319,7 @@ const Sidebar = ({ user, balance, logout, role, isAdmin, isRoot, authorizationLo
                 <NavLink
                   key={to}
                   to={to}
-                  className={({ isActive }) => `flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${isActive ? "scale-[0.97]" : ""}`}
+                  className={({ isActive }) => `stardraw-nav-item flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${isActive ? "scale-[0.97]" : ""}`}
                   style={({ isActive }) => ({
                     color: isActive ? ui.primary : ui.muted,
                     background: isActive ? ui.navActiveBg : "transparent",
@@ -488,7 +488,7 @@ const Layout = () => {
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: ui.page, color: ui.text }}>
+    <div className="stardraw-workspace flex min-h-screen" style={{ background: ui.page, color: ui.text }}>
       <Sidebar
         user={user}
         balance={balance}
@@ -505,7 +505,7 @@ const Layout = () => {
       />
 
       <div className="ml-64 flex-1 flex flex-col min-h-screen">
-        <header className="fixed top-0 right-0 h-16 z-40 flex items-center justify-between px-8 glass-nav"
+        <header className="stardraw-workspace-header fixed top-0 right-0 h-16 z-40 flex items-center justify-between px-8 glass-nav"
           style={{
             width: "calc(100% - 16rem)",
             background: ui.header,
@@ -566,7 +566,7 @@ const Layout = () => {
           </div>
         </header>
 
-        <main className="mt-16 flex-1">
+        <main className="stardraw-workspace-main mt-16 flex-1">
           <Outlet />
         </main>
         {announcementPromptOpen && <AnnouncementPrompt items={announcementItems} unreadCount={unreadAnnouncementItems.length} onDismiss={() => markAnnouncementsSeen()} />}

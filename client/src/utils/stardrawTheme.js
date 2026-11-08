@@ -9,16 +9,16 @@ export const readStarDrawTheme = () => {
 
 export const stardrawThemeTokens = {
   night: {
-    page: "#10141a",
-    surface: "#181c22",
-    surfaceAlt: "#0a0e14",
-    surfaceHigh: "#1c2026",
+    page: "#0d1117",
+    surface: "rgba(23, 30, 38, 0.74)",
+    surfaceAlt: "rgba(12, 17, 23, 0.72)",
+    surfaceHigh: "rgba(39, 48, 58, 0.76)",
     surfaceRaised: "#262a31",
     text: "#dfe2eb",
     muted: "#c2c7d0",
     faint: "#8f9095",
-    line: "rgba(69,71,75,0.18)",
-    lineStrong: "rgba(69,71,75,0.32)",
+    line: "rgba(255,255,255,0.10)",
+    lineStrong: "rgba(255,255,255,0.18)",
     primary: "#ee9d47",
     primaryStrong: "#d77b2c",
     primaryText: "#2b1708",
@@ -29,7 +29,7 @@ export const stardrawThemeTokens = {
     dangerSoft: "rgba(255,180,171,0.12)",
     success: "#52d87a",
     overlay: "rgba(16,20,26,0.85)",
-    shadow: "0 20px 48px rgba(0,0,0,0.34)",
+    shadow: "0 24px 70px rgba(0,0,0,0.36)",
     buttonGradient: "linear-gradient(135deg, #f2ad61 0%, #cf6f26 100%)",
   },
   day: {

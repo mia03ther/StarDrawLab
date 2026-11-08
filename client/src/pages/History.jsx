@@ -40,7 +40,7 @@ const AssetCard = ({ item, selected, onToggle, onSingleDownload, onDelete, onAdd
     : null;
 
   return (
-    <div className="group rounded-2xl overflow-hidden flex flex-col transition-all duration-200"
+    <div className="stardraw-asset-card group rounded-2xl overflow-hidden flex flex-col transition-all duration-200"
       style={{
         background: ui.surface,
         border: `1px solid ${ui.line}`,
@@ -446,9 +446,9 @@ const History = () => {
   const hasMore = items.length < total;
 
 	  return (
-	    <div className="p-10 max-w-[1400px] mx-auto">
+	    <div className="history-shell p-10 max-w-[1400px] mx-auto">
       {/* Header */}
-      <div className="mb-10 flex items-start justify-between">
+      <div className="history-title mb-10 flex items-start justify-between">
         <div>
 	          <h2 className="text-4xl font-extrabold mb-2"
 	            style={{ color: ui.text, fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
@@ -493,7 +493,7 @@ const History = () => {
         </div>
       </div>
 
-	      <div className="mb-8 rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: ui.surface, border: `1px solid ${ui.line}` }}>
+	      <div className="history-search mb-8 rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: ui.surface, border: `1px solid ${ui.line}` }}>
 	        <span className="material-symbols-outlined text-[18px]" style={{ color: ui.faint }}>search</span>
         <input
           value={query}
@@ -510,7 +510,7 @@ const History = () => {
       </div>
 
       {/* Tab bar */}
-	      <div className="flex items-center gap-1 mb-8 p-1.5 rounded-full w-fit"
+	      <div className="history-tabs flex items-center gap-1 mb-8 p-1.5 rounded-full w-fit"
 	        style={{ background: ui.surface, border: `1px solid ${ui.line}` }}>
         {[
           { key: "all",   label: t("全部素材", "All Assets") },
