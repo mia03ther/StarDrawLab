@@ -1,3 +1,4 @@
+import { getPhysicalDraft } from "../utils/physicalDraft";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -80,6 +81,7 @@ const SceneImage = () => {
   const promptOptimizationRef = useRef(false);
   const generationRequestRef = useRef(false);
   const activeRequestKeyRef = useRef(null);
+  const physicalDraftAppliedRef = useRef(false);
 
   const [scenes, setScenes] = useState([]);
   const [selectedScene, setSelectedScene] = useState(null);
@@ -197,6 +199,16 @@ const SceneImage = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [resultPreviewOpen]);
+
+  useEffect(() => {
+    if (!physicalProduct || physicalDraftAppliedRef.current) return;
+    const draft = getPhysicalDraft();
+    if (!draft?.file) return;
+    physicalDraftAppliedRef.current = true;
+    const previewUrl = URL.createObjectURL(draft.file);
+    setReferenceFiles([{ id: `physical-${draft.file.name}-${draft.file.lastModified}-${draft.file.size}`, file: draft.file, previewUrl }]);
+    if (draft.prompt) setPrompt(draft.prompt);
+  }, [physicalProduct]);
 
   useEffect(() => {
     Promise.all([
@@ -576,11 +588,20 @@ const SceneImage = () => {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-3">
-              <button type="button" onClick={() => window.dispatchEvent(new Event("stardraw:open-custom-contact"))} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.primarySoft, color: ui.primary, border: `1px solid ${ui.primary}` }}>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("stardraw:open-custom-contact"))}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95"
+                style={{ background: ui.primarySoft, color: ui.primary, border: `1px solid ${ui.primary}` }}
+              >
                 <span className="material-symbols-outlined text-sm">chat</span>
                 {physicalProduct ? t("扫码咨询报价", "Scan for a quote") : t("把这张作品做成实物", "Make this into a product")}
               </button>
-              <button onClick={handleDownload} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95" style={{ background: ui.buttonGradient, color: ui.primaryText, fontFamily: "Manrope, sans-serif" }}>
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 active:scale-95"
+                style={{ background: ui.buttonGradient, color: ui.primaryText, fontFamily: "Manrope, sans-serif" }}
+              >
                 <span className="material-symbols-outlined text-sm">download</span>
                 {t("下载无水印原图", "Download Without Watermark")}
               </button>

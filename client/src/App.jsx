@@ -5,7 +5,7 @@ import RoleGuard from "./components/RoleGuard";
 import { Toaster } from "react-hot-toast";
 import CustomerServiceQr from "./components/CustomerServiceQr";
 
-const Landing = lazy(() => import("./pages/Landing"));
+const Landing = lazy(() => import("./pages/AtelierLanding"));
 const PhysicalCustomMvp = lazy(() => import("./pages/PhysicalCustomMvp"));
 const AgentHome = lazy(() => import("./pages/AgentHome"));
 const Layout = lazy(() => import("./pages/Layout"));
@@ -62,11 +62,6 @@ const PageFallback = () => (
 const App = () => {
   return (
     <div>
-      {import.meta.env.DEV && import.meta.env.VITE_LOCAL_DEVELOPMENT === "true" && (
-        <aside role="status" aria-label="本地开发环境" style={{ position: "fixed", left: "50%", bottom: 12, transform: "translateX(-50%)", zIndex: 100, padding: "6px 12px", borderRadius: 999, background: "#fff4dc", color: "#714300", border: "1px solid #dec48b", fontSize: 12, pointerEvents: "none" }}>
-          本地测试 · 模拟生成
-        </aside>
-      )}
       <Toaster
         position="bottom-right"
         containerStyle={{ bottom: "84px", right: "20px" }}
