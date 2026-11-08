@@ -6,6 +6,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useOssResourceAccess } from "../contexts/OssResourceAccessContext";
 import { OssImage, OssVideo } from "../components/OssMedia";
 import AssetPreviewModal from "../components/AssetPreviewModal";
+import "./Dashboard.css";
 
 const readTheme = () => {
   if (typeof window === "undefined") return "night";
@@ -91,7 +92,7 @@ const CreationCard = ({ item, onDownload, onPreview, isZh, t, ui }) => {
   const canPreview = Boolean(canDownload && (previewVideoUrl || imagePreviewUrl));
 
   return (
-    <div className="group">
+    <div className="dashboard-creation group">
       <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-4 relative"
         style={{ background: ui.inset, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}>
         <button
@@ -290,9 +291,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-10 max-w-[1400px] mx-auto">
+    <div className="dashboard-page p-10 max-w-[1400px] mx-auto">
       {/* Hero greeting */}
-      <section className="mb-14">
+      <section className="dashboard-hero mb-14">
         <h2 className="text-[2.6rem] font-extrabold leading-tight mb-3"
           style={{ color: ui.text, fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
           {isZh ? `欢迎回来${user?.name ? `，${user.name.split(" ")[0]}` : ""}。` : `Welcome back${user?.name ? `, ${user.name.split(" ")[0]}` : ""}.`}<br />
@@ -305,13 +306,13 @@ const Dashboard = () => {
 
       {/* Account stats */}
       {account && (
-        <div className="grid grid-cols-3 gap-4 mb-14">
+        <div className="dashboard-stats grid grid-cols-3 gap-4 mb-14">
           {[
             { label: t("可用积分", "Available Points"), value: account.available_points ?? 0,  icon: "bolt", color: ui.primary },
             { label: t("冻结积分", "Held Points"), value: account.held_points ?? 0, icon: "lock_clock", color: ui.gold },
             { label: t("会员等级", "Membership"), value: isZh ? ((account.membership_tier || "free") === "free" ? "免费" : (account.membership_tier || "").toUpperCase()) : (account.membership_tier || "free").toUpperCase(), icon: "workspace_premium", color: ui.muted },
           ].map(({ label, value, icon, color }) => (
-            <div key={label} className="rounded-2xl p-5 flex items-center gap-4"
+            <div key={label} className="dashboard-stat rounded-2xl p-5 flex items-center gap-4"
               style={{ background: ui.card, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ background: ui.inset, border: `1px solid ${ui.line}` }}>
@@ -327,9 +328,9 @@ const Dashboard = () => {
       )}
 
       {/* Quick access bento */}
-      <section className="grid grid-cols-12 gap-5 mb-14">
+      <section className="dashboard-bento grid grid-cols-12 gap-5 mb-14">
         {/* AI Image card */}
-        <div className="col-span-12 lg:col-span-7 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
+        <div className="dashboard-tool dashboard-tool-image col-span-12 lg:col-span-7 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
           style={{ background: ui.card, border: `1px solid ${ui.lineSoft}`, boxShadow: ui.shadow }}
           onClick={() => navigate("/ai/scene-image")}>
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -356,7 +357,7 @@ const Dashboard = () => {
         </div>
 
         {/* AI Video card */}
-        <div className="col-span-12 lg:col-span-5 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
+        <div className="dashboard-tool dashboard-tool-video col-span-12 lg:col-span-5 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
           style={{ background: ui.cardAlt, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}
           onClick={() => navigate("/ai/ai-video")}>
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -383,7 +384,7 @@ const Dashboard = () => {
         </div>
 
         {/* Digital Human card */}
-        <div className="col-span-12 lg:col-span-5 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
+        <div className="dashboard-tool dashboard-tool-human col-span-12 lg:col-span-5 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
           style={{ background: ui.cardAlt, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}
           onClick={() => navigate("/ai/digital-human")}>
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -410,7 +411,7 @@ const Dashboard = () => {
         </div>
 
         <div
-          className="col-span-12 lg:col-span-7 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
+          className="dashboard-tool dashboard-tool-canvas col-span-12 lg:col-span-7 group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500"
           style={{ background: ui.card, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}
           onClick={() => navigate("/ai/canvas")}
         >
@@ -443,7 +444,7 @@ const Dashboard = () => {
       </section>
 
       {/* Recent creations */}
-      <section>
+      <section className="dashboard-recent">
         <div className="flex items-end justify-between mb-8 px-1">
           <div>
             <h3 className="text-2xl font-bold" style={{ color: ui.text, fontFamily: "Manrope, sans-serif" }}>

@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate, NavLink } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Bell } from "lucide-react";
+import { Bell, Sparkles } from "lucide-react";
 import { useAuthing } from "../contexts/AuthingContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import useAuthAxios from "../hooks/useAuthAxios";
@@ -269,11 +269,11 @@ const Sidebar = ({ user, balance, logout, role, isAdmin, isRoot, authorizationLo
     style={{ background: ui.sidebar, borderRight: `1px solid ${ui.line}` }}>
     <div className="flex flex-col h-full py-6 px-4">
       <button type="button" onClick={() => onNavigate("/")} className="mb-10 px-2 flex items-center gap-3 text-left transition-opacity hover:opacity-80" title={isZh ? "返回首页" : "Back to homepage"} aria-label={isZh ? "返回 StarDraw 首页" : "Back to StarDraw home"}>
-        <span className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: ui.primary }}>
-          <span className="material-symbols-outlined filled text-sm" style={{ color: ui.primaryText }}>architecture</span>
+        <span className="stardraw-brand-mark w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: ui.primary }}>
+          <Sparkles size={16} style={{ color: ui.primaryText }} />
         </span>
         <span>
-          <span className="block text-base font-bold tracking-tighter font-headline" style={{ color: ui.text, fontFamily: "Manrope, sans-serif" }}>StarDraw</span>
+          <span className="stardraw-brand-wordmark block text-base font-bold tracking-tighter font-headline" style={{ color: ui.text, fontFamily: "Manrope, sans-serif" }}>StarDraw</span>
           <span className="block text-[9px] uppercase tracking-[0.18em] font-medium" style={{ color: ui.muted, opacity: 0.65 }}>{isZh ? "数字内容架构台" : "The Digital Architect"}</span>
         </span>
       </button>
