@@ -6,6 +6,7 @@ import { useAuthing } from "../contexts/AuthingContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useStarDrawTheme } from "../utils/stardrawTheme";
 import { OssImage, OssVideo } from "../components/OssMedia";
+import "./AccountCenter.css";
 
 const getStatusConfig = (isZh, ui) => ({
   completed: { label: isZh ? "已完成" : "Completed", color: ui.primary },
@@ -212,9 +213,9 @@ const AccountCenter = () => {
   };
 
   return (
-    <div className="p-10 max-w-[1400px] mx-auto">
-      <section className="grid grid-cols-12 gap-6 mb-8">
-        <div className="col-span-12 xl:col-span-7 rounded-3xl p-8"
+    <div className="account-studio p-10 max-w-[1400px] mx-auto">
+      <section className="account-studio-hero grid grid-cols-12 gap-6 mb-8">
+        <div className="account-profile-card col-span-12 xl:col-span-7 rounded-3xl p-8"
           style={{ background: ui.surface, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}>
           <div className="flex items-start gap-5">
             {user?.imageUrl ? (
@@ -294,7 +295,7 @@ const AccountCenter = () => {
           </div>
         </div>
 
-        <div className="col-span-12 xl:col-span-5 rounded-3xl p-6"
+        <div className="account-snapshot-card col-span-12 xl:col-span-5 rounded-3xl p-6"
           style={{ background: ui.surface, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}>
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold mb-5" style={{ color: ui.faint }}>
             {t("账户概览", "Account Snapshot")}
@@ -317,7 +318,7 @@ const AccountCenter = () => {
         </div>
       </section>
 
-      <section className="grid grid-cols-12 gap-6">
+      <section className="account-studio-panels grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-4 rounded-3xl p-6"
           style={{ background: ui.surface, border: `1px solid ${ui.line}`, boxShadow: ui.shadow }}>
           <div className="mb-6 rounded-2xl p-4"

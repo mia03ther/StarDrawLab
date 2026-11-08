@@ -26,6 +26,7 @@ import {
   getGenerationRequestKey,
   shouldKeepGenerationRequestKey,
 } from "../utils/generationRequestIdentity";
+import "./SceneImage.css";
 import {
   isOversizedReferenceImage,
   MAX_REFERENCE_IMAGE_BYTES,
@@ -697,8 +698,8 @@ const SceneImage = () => {
   };
 
   return (
-    <div className="p-10 max-w-[1480px] mx-auto">
-      <div className="mb-8">
+    <div className="scene-studio p-10 max-w-[1480px] mx-auto">
+      <div className="scene-studio-heading mb-8">
         <h2 className="text-4xl font-extrabold mb-2" style={{ color: ui.text, fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
           {physicalProduct ? t("生成你的实物设计预览", "Generate your product design preview") : t("AI 图片生成", "AI Image Generation")}
         </h2>
@@ -707,7 +708,7 @@ const SceneImage = () => {
         </p>
       </div>
 
-      <section className="mb-8">
+      <section className="scene-template-gallery mb-8">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <p className="text-[10px] uppercase tracking-widest font-bold mb-1" style={{ color: ui.primary }}>
@@ -726,7 +727,7 @@ const SceneImage = () => {
               type="button"
               onClick={() => applyScene(scene, { adoptStarterPrompt: true, scroll: true })}
               onDoubleClick={() => applyScene(scene, { adoptStarterPrompt: true, scroll: true })}
-              className="group overflow-hidden rounded-3xl text-left transition-all"
+              className="scene-template-card group overflow-hidden rounded-3xl text-left transition-all"
               style={{
                 background: ui.surface,
                 border: `1px solid ${selectedScene?.scene_key === scene.scene_key ? ui.primary : ui.line}`,
@@ -813,7 +814,7 @@ const SceneImage = () => {
         </section>
       )}
 
-      <div className="grid grid-cols-12 gap-8 items-start">
+      <div className="scene-studio-grid grid grid-cols-12 gap-8 items-start">
         <section className="col-span-12 xl:col-span-4 space-y-6 xl:sticky xl:top-24">
           <div className="rounded-3xl p-4" style={{ background: ui.surface }}>
             <button
