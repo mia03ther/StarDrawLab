@@ -9,6 +9,7 @@ import { normalizeTemplates } from "../utils/templateData";
 import { mergeTemplatePages, shouldShowInitialTemplateLoading } from "../utils/templateMarketplacePagination";
 import { useStarDrawTheme } from "../utils/stardrawTheme";
 import { v4 as uuidv4 } from "uuid";
+import "./TemplateMarketplace.css";
 
 const FILTERS = [
   { key: "all", icon: "apps", zh: "全部", en: "All" },
@@ -225,12 +226,12 @@ const TemplateMarketplace = () => {
     }
 
     return (
-      <div className="mx-auto max-w-7xl p-4 md:p-8">
+      <div className="template-detail-studio mx-auto max-w-7xl p-4 md:p-8">
         <button type="button" onClick={() => navigate("/ai/templates")} className="mb-5 inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-bold" style={{ color: ui.muted, border: `1px solid ${ui.line}` }}>
           <span className="material-symbols-outlined text-[18px]">arrow_back</span>{t("模板市场", "Templates")}
         </button>
         <div className="grid gap-7 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
-          <div className="overflow-hidden rounded-lg" style={{ background: ui.surfaceAlt, border: `1px solid ${ui.line}` }}>
+          <div className="template-detail-preview overflow-hidden rounded-lg" style={{ background: ui.surfaceAlt, border: `1px solid ${ui.line}` }}>
             <Preview template={selected} controls className="aspect-video h-full max-h-[680px] w-full object-contain" />
           </div>
           <section className="min-w-0">
@@ -268,13 +269,13 @@ const TemplateMarketplace = () => {
   }
 
   return (
-    <div className="mx-auto max-w-[1500px] p-4 md:p-8">
-      <div className="flex flex-col justify-between gap-4 border-b pb-6 lg:flex-row lg:items-end" style={{ borderColor: ui.line }}>
+    <div className="template-marketplace mx-auto max-w-[1500px] p-4 md:p-8">
+      <div className="template-marketplace-heading flex flex-col justify-between gap-4 border-b pb-6 lg:flex-row lg:items-end" style={{ borderColor: ui.line }}>
         <div><h1 className="text-2xl font-black md:text-3xl" style={{ color: ui.text }}>{t("模板市场", "Template Marketplace")}</h1><p className="mt-2 text-sm" style={{ color: ui.muted }}>{t("浏览公开模板和你的私有模板，并直接进入生成流程。", "Browse public and private templates and start creating.")}</p></div>
         <button type="button" onClick={() => navigate("/ai/template-studio")} className="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold" style={{ border: `1px solid ${ui.line}`, color: ui.text }}><span className="material-symbols-outlined text-[18px]">add</span>{t("管理我的模板", "Manage my templates")}</button>
       </div>
 
-      <div className="sticky top-0 z-10 -mx-2 mt-5 space-y-3 px-2 py-3" style={{ background: ui.page }}>
+      <div className="template-marketplace-filters sticky top-0 z-10 -mx-2 mt-5 space-y-3 px-2 py-3" style={{ background: ui.page }}>
         <div className="flex flex-col gap-3 lg:flex-row">
           <label className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2.5" style={{ background: ui.surface, border: `1px solid ${ui.line}` }}><span className="material-symbols-outlined text-[19px]" style={{ color: ui.faint }}>search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("搜索模板、标签或场景", "Search templates, tags, or scenes")} className="min-w-0 flex-1 bg-transparent text-sm outline-none" style={{ color: ui.text }} /></label>
           <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg p-1" style={{ background: ui.surfaceAlt, border: `1px solid ${ui.line}` }}>{FILTERS.map((item) => <button key={item.key} type="button" onClick={() => setFilter(item.key)} className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold" style={{ background: filter === item.key ? ui.surfaceHigh : "transparent", color: filter === item.key ? ui.primary : ui.muted }}><span className="material-symbols-outlined text-[16px]">{item.icon}</span>{t(item.zh, item.en)}</button>)}</div>
@@ -285,7 +286,7 @@ const TemplateMarketplace = () => {
       {initialLoading ? <div className="flex min-h-[40vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: ui.primary, borderTopColor: "transparent" }} /></div> : filtered.length === 0 ? <div className="py-20 text-center text-sm" style={{ color: ui.muted }}>{t("没有匹配的模板", "No matching templates")}</div> : (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((template) => (
-            <article key={template.id || template.scene_key} className="group overflow-hidden rounded-lg" style={{ background: ui.surface, border: `1px solid ${ui.line}` }}>
+            <article key={template.id || template.scene_key} className="template-marketplace-card group overflow-hidden rounded-lg" style={{ background: ui.surface, border: `1px solid ${ui.line}` }}>
               <button type="button" onClick={() => navigateWithTemplate(navigate, template)} className="block w-full text-left"><div className="relative aspect-video overflow-hidden"><Preview template={template} hoverPreview className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /><div className="absolute left-2 top-2 flex flex-wrap gap-1">{template.is_featured && <span className="rounded-md px-2 py-1 text-[10px] font-black" style={{ background: ui.gold, color: "#171717" }}>{t("优选", "Featured")}</span>}{template.source_key === "awesome-gpt-image-2" && <span className="rounded-md bg-black/70 px-2 py-1 text-[10px] font-black text-white">GPT-Image2</span>}</div><span className="absolute bottom-2 right-2 rounded-md bg-black/65 px-2 py-1 text-[10px] font-bold text-white">{TIER_LABELS[template.required_membership_tier || "free"]}</span></div><div className="p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><h2 className="truncate text-sm font-black" style={{ color: ui.text }}>{template.preview_title || template.scene_name}</h2><p className="mt-1 line-clamp-2 min-h-9 text-xs leading-[18px]" style={{ color: ui.muted }}>{template.preview_description || template.scene_key}</p></div><span className="material-symbols-outlined text-[18px]" style={{ color: ui.faint }}>arrow_outward</span></div><div className="mt-3 flex items-center justify-between text-[10px]" style={{ color: ui.faint }}><span>{template.output_type === "video" ? t("视频", "Video") : t("图片", "Image")} · v{template.version || 1}</span><span>{template.points_cost ?? "-"} pt</span></div></div></button>
               <div className="border-t p-2" style={{ borderColor: ui.line }}><button type="button" onClick={() => navigateWithTemplate(navigate, template)} className="flex w-full items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-bold" style={{ background: ui.primarySoft, color: ui.primary }}><span className="material-symbols-outlined text-[16px]">play_arrow</span>{t("一键使用", "Use")}</button></div>
             </article>
