@@ -5,7 +5,8 @@ import RoleGuard from "./components/RoleGuard";
 import { Toaster } from "react-hot-toast";
 import CustomerServiceQr from "./components/CustomerServiceQr";
 
-const Landing = lazy(() => import("./pages/AtelierLanding"));
+const Landing = lazy(() => import("./pages/Landing"));
+const AtelierLanding = lazy(() => import("./pages/AtelierLanding"));
 const PhysicalCustomMvp = lazy(() => import("./pages/PhysicalCustomMvp"));
 const AgentHome = lazy(() => import("./pages/AgentHome"));
 const Layout = lazy(() => import("./pages/Layout"));
@@ -82,10 +83,10 @@ const App = () => {
       <Routes>
         {/* Keep the established creation dashboard as the default product home.
             The physical-design MVP is intentionally isolated behind its own entry. */}
-        <Route path="/" element={<Navigate to="/ai" replace />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/design" element={<PhysicalCustomMvp />} />
         <Route path="/custom" element={<Navigate to="/design" replace />} />
-        <Route path="/design/landing" element={<Landing />} />
+        <Route path="/design/landing" element={<AtelierLanding />} />
         {/* Keep the legacy URL usable while the community feed lives on the home page. */}
         <Route path="/discover" element={<Navigate to="/home#community" replace />} />
         <Route
