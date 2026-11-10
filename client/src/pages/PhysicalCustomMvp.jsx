@@ -47,7 +47,8 @@ export default function PhysicalCustomMvp() {
     if (step < 3) return setStep((v) => v + 1);
     if (!isSignedIn) return login();
     const prompt = `将用户照片转为${style.name}风格的${product.name}设计预览，主体清晰完整，适合实体制作，画面无文字、无水印、留出干净背景。`;
-    const formData = new FormData(); formData.append("scene_key", "freeform_image"); formData.append("user_prompt", prompt); formData.append("model", "nano-banana-2"); formData.append("size", "1024x1024"); formData.append("visual_parameters", "{}"); formData.append("images", file);
+    // Use the enabled production image-edit model for flows with an uploaded photo.
+    const formData = new FormData(); formData.append("scene_key", "freeform_image"); formData.append("user_prompt", prompt); formData.append("model", "gpt-image-2"); formData.append("size", "1024x1024"); formData.append("visual_parameters", "{}"); formData.append("images", file);
     setGenerating(true); setGenerationError(""); setResult(null);
     try {
       const { data } = await authAxios.post("/api/ai/generate-scene-image", formData);
