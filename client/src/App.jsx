@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import CustomerServiceQr from "./components/CustomerServiceQr";
 
 const Landing = lazy(() => import("./pages/Landing"));
+const CreationEntry = lazy(() => import("./pages/CreationEntry"));
 const AtelierLanding = lazy(() => import("./pages/AtelierLanding"));
 const PhysicalCustomMvp = lazy(() => import("./pages/PhysicalCustomMvp"));
 const AgentHome = lazy(() => import("./pages/AgentHome"));
@@ -84,6 +85,7 @@ const App = () => {
         {/* Keep the established creation dashboard as the default product home.
             The physical-design MVP is intentionally isolated behind its own entry. */}
         <Route path="/" element={<Landing />} />
+        <Route path="/create" element={<CreationEntry />} />
         <Route path="/design" element={<PhysicalCustomMvp />} />
         <Route path="/custom" element={<Navigate to="/design" replace />} />
         <Route path="/design/landing" element={<AtelierLanding />} />

@@ -154,6 +154,12 @@ export default function Landing() {
 
   const submit = (event) => {
     event.preventDefault();
+    // A blank hero prompt means the visitor is choosing a creation direction.
+    // Keep a typed request on the existing Agent path so no creative intent is lost.
+    if (!prompt.trim()) {
+      navigate("/create");
+      return;
+    }
     enterAgent(prompt);
   };
 
@@ -188,8 +194,8 @@ export default function Landing() {
             >
               {isZh ? "EN" : "中"}
             </button>
-            <button type="button" className="landing-enter" onClick={() => enterAgent()} disabled={isLoading}>
-              {isSignedIn ? t("进入 StarDraw", "Open StarDraw") : t("开始创作", "Start creating")}
+            <button type="button" className="landing-enter" onClick={() => navigate("/create")}>
+              {t("选择创作方式", "Choose how to create")}
               <ArrowRight size={15} />
             </button>
           </div>
