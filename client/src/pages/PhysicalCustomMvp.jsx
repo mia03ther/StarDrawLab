@@ -20,7 +20,7 @@ const inspirations = [
 ];
 
 export default function PhysicalCustomMvp() {
-  const { isSignedIn, isAdmin, login } = useAuthing(); const authAxios = useAuthAxios();
+  const { isReady, isSignedIn, isAdmin, login } = useAuthing(); const authAxios = useAuthAxios();
   const [step, setStep] = useState(1); const [file, setFile] = useState(null); const [style, setStyle] = useState(styles[0]); const [product, setProduct] = useState(products[0]);
   const [result, setResult] = useState(null); const [generating, setGenerating] = useState(false); const [generationError, setGenerationError] = useState("");
   const [caseTemplates, setCaseTemplates] = useState([]);
@@ -53,6 +53,12 @@ export default function PhysicalCustomMvp() {
   const advance = async () => {
     if (step === 1 && !file) return;
     if (step < 3) return setStep((v) => v + 1);
+    // Avoid treating the first render of Authing hydration as a logged-out user.
+    // That race used to send an already logged-in visitor into the legacy home.
+    if (!isReady) {
+      toast("正在确认登录状态，请再点一次生成。", { icon: "⌛" });
+      return;
+    }
     if (!isSignedIn) {
       // Authing always returns through /callback. Preserve this dedicated flow
       // instead of letting the generic callback send the user into the old AI home.
