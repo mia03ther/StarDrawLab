@@ -13,10 +13,20 @@ const Callback = () => {
       const hasPendingAgentInstruction = Boolean(window.localStorage.getItem("stardraw_pending_agent_instruction"));
       const hasPendingHomePrompt = Boolean(window.localStorage.getItem("stardraw_pending_home_prompt"));
       const hasPendingInvitation = Boolean(window.localStorage.getItem("stardraw_pending_invitation_code"));
+      // Some entry flows (such as physical customisation) must resume in their
+      // own workspace after authentication instead of being dropped into /home.
+      // Only accept a local relative route so this cannot become an open redirect.
+      const savedReturnPath = window.sessionStorage.getItem("stardraw_post_login_path");
+      const postLoginPath = savedReturnPath?.startsWith("/") && !savedReturnPath.startsWith("//")
+        ? savedReturnPath
+        : null;
+      if (postLoginPath && isSignedIn) window.sessionStorage.removeItem("stardraw_post_login_path");
       const destination = !isSignedIn
         ? "/"
         : hasPendingInvitation
           ? "/invite"
+          : postLoginPath
+            ? postLoginPath
         : hasPendingAgentInstruction
           ? "/home"
           : hasPendingHomePrompt

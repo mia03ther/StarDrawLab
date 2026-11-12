@@ -167,6 +167,15 @@ const TemplateStudio = () => {
     setSelectedTemplateIds((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
   };
 
+  const toggleVisibleTemplateSelection = () => {
+    const visibleIds = filteredTemplates.map((template) => String(template.id));
+    if (visibleIds.length === 0) return;
+    const allVisibleSelected = visibleIds.every((id) => selectedTemplateIds.includes(id));
+    setSelectedTemplateIds((current) => allVisibleSelected
+      ? current.filter((id) => !visibleIds.includes(id))
+      : [...new Set([...current, ...visibleIds])]);
+  };
+
   const applyBatchUpdate = async (kind) => {
     if (!isManagement || busy || selectedTemplates.length === 0) return;
     const actionLabels = {
@@ -175,7 +184,9 @@ const TemplateStudio = () => {
     };
     setSaving(true);
     try {
-      for (const [index, template] of selectedTemplates.entries()) {
+      // Do not stop a whole selection after one legacy template fails. Run the
+      // independent requests together and report the exact outcome to the admin.
+      const updates = selectedTemplates.map((template, index) => {
         const draftForUpdate = toTemplateDraft(template);
         const next = {
           ...draftForUpdate,
@@ -185,13 +196,22 @@ const TemplateStudio = () => {
           ...(kind === "unfeature" ? { is_featured: false } : {}),
           ...(kind === "order" ? { display_order: Number(batchOrder) + index } : {}),
         };
-        await authAxios.put(`${writeBase}/${template.id}`, buildTemplatePayload(next));
-      }
+        return authAxios.put(`${writeBase}/${template.id}`, buildTemplatePayload(next));
+      });
+      const outcomes = await Promise.allSettled(updates);
+      const succeeded = outcomes.filter((outcome) => outcome.status === "fulfilled").length;
+      const failed = outcomes.length - succeeded;
       await loadTemplates(draft.id);
-      setSelectedTemplateIds([]);
-      toast.success(t(`已${actionLabels[kind]} ${selectedTemplates.length} 个模板`, `${selectedTemplates.length} templates updated`));
+      if (failed === 0) {
+        setSelectedTemplateIds([]);
+        toast.success(t(`已${actionLabels[kind]} ${succeeded} 个模板`, `${succeeded} templates updated`));
+      } else {
+        const firstFailure = outcomes.find((outcome) => outcome.status === "rejected");
+        const message = firstFailure?.reason?.response?.data?.message;
+        toast.error(message || t(`已完成 ${succeeded} 个，${failed} 个失败；请保留选择后重试失败项。`, `${succeeded} updated; ${failed} failed. Keep the selection and retry the failed items.`));
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || t("批量更新失败，已停止后续操作。", "Batch update failed and remaining templates were not changed."));
+      toast.error(error.response?.data?.message || t("批量更新失败，请重试。", "Batch update failed. Please retry."));
     } finally { setSaving(false); }
   };
 
@@ -276,6 +296,7 @@ const TemplateStudio = () => {
           { value: "all", label: t("全部状态", "All statuses") }, { value: "active", label: t("使用中", "Active") }, { value: "disabled", label: t("已下架", "Disabled") },
           ...(isManagement ? [{ value: "pending", label: t("旧公开申请", "Older publication requests") }] : []),
         ]} />
+        {isManagement && filteredTemplates.length > 0 && <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-xs" style={{ background: ui.surface, borderColor: ui.line, color: ui.muted }}><span>{t(`当前筛选 ${filteredTemplates.length} 个模板`, `${filteredTemplates.length} filtered`)}</span><button type="button" disabled={busy} onClick={toggleVisibleTemplateSelection} className="rounded-lg px-3 py-1.5 font-bold" style={{ background: ui.primarySoft, color: ui.primary }}>{filteredTemplates.every((template) => selectedTemplateIds.includes(String(template.id))) ? t("取消全选", "Clear visible") : t("全选当前筛选", "Select all visible")}</button></div>}
         {isManagement && selectedTemplates.length > 0 && <div className="sticky top-3 z-10 rounded-2xl border p-3 shadow-lg" style={{ background: ui.surfaceHigh, borderColor: ui.primary }}>
           <div className="mb-3 flex items-center justify-between gap-2"><strong className="text-sm" style={{ color: ui.text }}>{t(`已选 ${selectedTemplates.length} 个模板`, `${selectedTemplates.length} selected`)}</strong><button type="button" onClick={() => setSelectedTemplateIds([])} className="text-xs underline" style={{ color: ui.muted }}>{t("取消选择", "Clear")}</button></div>
           <div className="grid grid-cols-2 gap-2"><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("publish")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.primarySoft, color: ui.primary }}>{t("批量上架", "Publish")}</button><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("hide")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.dangerSoft, color: ui.danger }}>{t("批量下架", "Take down")}</button><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("feature")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.goldSoft, color: ui.gold }}>{t("设为精选", "Feature")}</button><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("unfeature")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.surfaceAlt, color: ui.muted }}>{t("取消精选", "Unfeature")}</button></div>

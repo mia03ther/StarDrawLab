@@ -53,7 +53,12 @@ export default function PhysicalCustomMvp() {
   const advance = async () => {
     if (step === 1 && !file) return;
     if (step < 3) return setStep((v) => v + 1);
-    if (!isSignedIn) return login();
+    if (!isSignedIn) {
+      // Authing always returns through /callback. Preserve this dedicated flow
+      // instead of letting the generic callback send the user into the old AI home.
+      window.sessionStorage.setItem("stardraw_post_login_path", "/design");
+      return login();
+    }
     const prompt = `将用户照片转为${style.name}风格的${product.name}设计预览，主体清晰完整，适合实体制作，画面无文字、无水印、留出干净背景。`;
     // The production provider accepts reference photos only with its enabled
     // image-edit model. Keep this flow aligned with the regular image page
