@@ -42,7 +42,7 @@ const TemplateStudio = () => {
   const [scope, setScope] = useState("mine");
   const [templateQuery, setTemplateQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [catalogFilter, setCatalogFilter] = useState("all");
+  const [catalogFilter, setCatalogFilter] = useState(() => new URLSearchParams(window.location.search).get("catalog") === "physical" ? "physical" : "all");
   const [selectedTemplateIds, setSelectedTemplateIds] = useState([]);
   const [batchOrder, setBatchOrder] = useState(1);
   const [savedTags, setSavedTags] = useState(readSavedTags);

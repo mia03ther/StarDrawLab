@@ -20,11 +20,19 @@ const inspirations = [
 ];
 
 export default function PhysicalCustomMvp() {
-  const { isSignedIn, login } = useAuthing(); const authAxios = useAuthAxios();
+  const { isSignedIn, isAdmin, login } = useAuthing(); const authAxios = useAuthAxios();
   const [step, setStep] = useState(1); const [file, setFile] = useState(null); const [style, setStyle] = useState(styles[0]); const [product, setProduct] = useState(products[0]);
   const [result, setResult] = useState(null); const [generating, setGenerating] = useState(false); const [generationError, setGenerationError] = useState("");
+  const [caseTemplates, setCaseTemplates] = useState([]);
   const preview = useMemo(() => file ? URL.createObjectURL(file) : "", [file]);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  useEffect(() => {
+    let active = true;
+    authAxios.get("/api/template-studio/prompt-templates", { params: { catalog: "marketplace", tag: "实体案例", output_type: "image", page_size: 12 } })
+      .then(({ data }) => { if (active) setCaseTemplates(Array.isArray(data?.data) ? data.data.filter((item) => item?.preview_image_url) : []); })
+      .catch(() => { if (active) setCaseTemplates([]); });
+    return () => { active = false; };
+  }, [authAxios]);
   const pending = ["pending", "running", "processing", "in_progress"].includes(result?.status);
   useEffect(() => {
     if (!result?.creation_id || !pending) return undefined;
@@ -78,8 +86,9 @@ export default function PhysicalCustomMvp() {
       </section></section>
     <section className="custom-inspiration" aria-label="实物设计灵感案例">
       <div className="custom-inspiration-head"><div><p>STYLE LIBRARY / FIRST EDITION</p><h2>先从你喜欢的感觉开始。</h2></div><span>选择一个案例，会直接带入对应风格</span></div>
-      <div className="custom-inspiration-grid">{inspirations.map((item, index) => <button type="button" key={item.style} onClick={() => useInspiration(item)} className={`custom-example custom-example-${item.tone}`}><div className="custom-example-art"><i /><b>{index === 0 ? "✦" : index === 1 ? "✶" : "◌"}</b><em>01/{String(index + 1).padStart(2, "0")}</em></div><div className="custom-example-copy"><small>{item.eyebrow}</small><h3>{item.title}</h3><p>{item.note}</p><span>使用这个方向 <ArrowRight size={14} /></span></div></button>)}</div>
-      <p className="custom-inspiration-note">首批展示框架已建立。后续会填入团队预生成的真实设计案例，用户可一键带入风格再上传自己的照片。</p>
+      {isAdmin && <Link to="/ai/admin/template-review?catalog=physical" className="custom-case-admin" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16, border: "1px solid rgba(241,208,137,.45)", borderRadius: 999, padding: "9px 13px", color: "#f1d089", background: "rgba(241,208,137,.08)", fontSize: 12, fontWeight: 800, textDecoration: "none" }}>管理实体案例 <ArrowRight size={14} /></Link>}
+      {caseTemplates.length > 0 ? <div className="custom-inspiration-grid">{caseTemplates.map((item, index) => <button type="button" key={item.id} onClick={() => { const match = styles.find((entry) => (item.tags || []).some((tag) => tag.includes(entry.name) || tag.toLowerCase().includes(entry.id))); useInspiration({ style: match?.id || styles[index % styles.length].id }); }} className="custom-example custom-example-template"><div className="custom-example-art"><OssImage src={item.preview_image_url} alt="" className="h-full w-full object-cover" /><em>CASE/{String(index + 1).padStart(2, "0")}</em></div><div className="custom-example-copy"><small>实体案例</small><h3>{item.scene_name}</h3><p>{item.preview_description || "选择这个案例的风格方向"}</p><span>使用这个方向 <ArrowRight size={14} /></span></div></button>)}</div> : <div className="custom-inspiration-grid">{inspirations.map((item, index) => <button type="button" key={item.style} onClick={() => useInspiration(item)} className={`custom-example custom-example-${item.tone}`}><div className="custom-example-art"><i /><b>{index === 0 ? "✦" : index === 1 ? "✶" : "◌"}</b><em>01/{String(index + 1).padStart(2, "0")}</em></div><div className="custom-example-copy"><small>{item.eyebrow}</small><h3>{item.title}</h3><p>{item.note}</p><span>使用这个方向 <ArrowRight size={14} /></span></div></button>)}</div>}
+      <p className="custom-inspiration-note">管理员在“管理实体案例”中给模板添加“实体案例”标签并上传预览图，即可在这里展示；可批量排序、精选、上架和下架。</p>
     </section>
     </main>;
 }
