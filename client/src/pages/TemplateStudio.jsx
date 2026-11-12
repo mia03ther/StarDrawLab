@@ -42,6 +42,9 @@ const TemplateStudio = () => {
   const [scope, setScope] = useState("mine");
   const [templateQuery, setTemplateQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [catalogFilter, setCatalogFilter] = useState("all");
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState([]);
+  const [batchOrder, setBatchOrder] = useState(1);
   const [savedTags, setSavedTags] = useState(readSavedTags);
   const [tagInput, setTagInput] = useState("");
   const isManagement = isAdmin && scope === "all";
@@ -89,9 +92,14 @@ const TemplateStudio = () => {
     if (statusFilter === "active" && template.is_active === false) return false;
     if (statusFilter === "disabled" && template.is_active !== false) return false;
     if (statusFilter === "pending" && template.approval_status !== "pending") return false;
+    if (catalogFilter === "featured" && !template.is_featured) return false;
+    if (catalogFilter === "image" && template.output_type !== "image") return false;
+    if (catalogFilter === "video" && template.output_type !== "video") return false;
+    if (catalogFilter === "physical" && !normalizeStudioTags(template.tags).some((tag) => /实体|定制|钥匙扣|贴纸|立牌|physical|keychain|sticker|standee|案例/i.test(tag))) return false;
     const query = templateQuery.trim().toLowerCase();
     return !query || [template.scene_name, template.preview_description, template.scene_key, ...normalizeStudioTags(template.tags)].join(" ").toLowerCase().includes(query);
   });
+  const selectedTemplates = templates.filter((template) => selectedTemplateIds.includes(String(template.id)));
   const tagChoices = useMemo(() => mergeStudioTagChoices(DEFAULT_TEMPLATE_TAGS, savedTags, ...templates.map((template) => template.tags)), [savedTags, templates]);
 
   const addTags = (values) => {
@@ -152,6 +160,39 @@ const TemplateStudio = () => {
       toast.success(t("模板已公开", "Template published"));
     } catch (error) { toast.error(error.response?.data?.message || t("公开失败", "Unable to publish template")); }
     finally { setSaving(false); }
+  };
+
+  const toggleTemplateSelection = (id) => {
+    const value = String(id);
+    setSelectedTemplateIds((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  };
+
+  const applyBatchUpdate = async (kind) => {
+    if (!isManagement || busy || selectedTemplates.length === 0) return;
+    const actionLabels = {
+      publish: t("上架", "publish"), hide: t("下架", "take down"), feature: t("设为精选", "feature"),
+      unfeature: t("取消精选", "unfeature"), order: t("设置排序", "set order"),
+    };
+    setSaving(true);
+    try {
+      for (const [index, template] of selectedTemplates.entries()) {
+        const draftForUpdate = toTemplateDraft(template);
+        const next = {
+          ...draftForUpdate,
+          ...(kind === "publish" ? { is_active: true } : {}),
+          ...(kind === "hide" ? { is_active: false } : {}),
+          ...(kind === "feature" ? { is_featured: true, featured_order: Number(batchOrder) + index } : {}),
+          ...(kind === "unfeature" ? { is_featured: false } : {}),
+          ...(kind === "order" ? { display_order: Number(batchOrder) + index } : {}),
+        };
+        await authAxios.put(`${writeBase}/${template.id}`, buildTemplatePayload(next));
+      }
+      await loadTemplates(draft.id);
+      setSelectedTemplateIds([]);
+      toast.success(t(`已${actionLabels[kind]} ${selectedTemplates.length} 个模板`, `${selectedTemplates.length} templates updated`));
+    } catch (error) {
+      toast.error(error.response?.data?.message || t("批量更新失败，已停止后续操作。", "Batch update failed and remaining templates were not changed."));
+    } finally { setSaving(false); }
   };
 
   const handlePreviewUpload = async (event) => {
@@ -223,19 +264,38 @@ const TemplateStudio = () => {
           <button type="button" disabled={busy} onClick={() => { setDraft(createTemplateDraft()); setTagInput(""); }} className="rounded-xl px-3 py-2 text-sm font-bold" style={{ background: ui.primarySoft, color: ui.primary }}>{t("新建模板", "New template")}</button>
         </div>
         <input aria-label={t("搜索已有模板", "Search existing templates")} value={templateQuery} onChange={(event) => setTemplateQuery(event.target.value)} placeholder={t("搜索名称或标签", "Search name or tags")} className="w-full rounded-xl border px-4 py-3 text-sm outline-none" style={{ background: ui.surface, borderColor: ui.line, color: ui.text }} />
+        {isManagement && <div className="rounded-2xl border p-3" style={{ background: ui.surfaceAlt, borderColor: ui.line }}>
+          <p className="mb-2 text-xs font-bold" style={{ color: ui.faint }}>{t("可视化分类", "Visual categories")}</p>
+          <div className="flex flex-wrap gap-2">{[
+            ["all", t("全部", "All")], ["featured", t("精选", "Featured")], ["physical", t("实体案例", "Physical")],
+            ["image", t("图片", "Image")], ["video", t("视频", "Video")],
+          ].map(([value, label]) => <button key={value} type="button" onClick={() => setCatalogFilter(value)} className="rounded-full border px-3 py-1.5 text-xs font-bold" style={{ borderColor: catalogFilter === value ? ui.primary : ui.line, background: catalogFilter === value ? ui.primarySoft : ui.surface, color: catalogFilter === value ? ui.primary : ui.muted }}>{label}</button>)}</div>
+          <p className="mt-2 text-xs" style={{ color: ui.faint }}>{t("“实体案例”按实体、定制、钥匙扣、贴纸、立牌等标签筛选；编辑标签即可归类。", "Physical cases are filtered by tags. Edit a template's tags to place it here.")}</p>
+        </div>}
         <SelectField label={t("模板状态", "Template status")} value={statusFilter} onChange={setStatusFilter} ui={ui} options={[
           { value: "all", label: t("全部状态", "All statuses") }, { value: "active", label: t("使用中", "Active") }, { value: "disabled", label: t("已下架", "Disabled") },
           ...(isManagement ? [{ value: "pending", label: t("旧公开申请", "Older publication requests") }] : []),
         ]} />
+        {isManagement && selectedTemplates.length > 0 && <div className="sticky top-3 z-10 rounded-2xl border p-3 shadow-lg" style={{ background: ui.surfaceHigh, borderColor: ui.primary }}>
+          <div className="mb-3 flex items-center justify-between gap-2"><strong className="text-sm" style={{ color: ui.text }}>{t(`已选 ${selectedTemplates.length} 个模板`, `${selectedTemplates.length} selected`)}</strong><button type="button" onClick={() => setSelectedTemplateIds([])} className="text-xs underline" style={{ color: ui.muted }}>{t("取消选择", "Clear")}</button></div>
+          <div className="grid grid-cols-2 gap-2"><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("publish")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.primarySoft, color: ui.primary }}>{t("批量上架", "Publish")}</button><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("hide")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.dangerSoft, color: ui.danger }}>{t("批量下架", "Take down")}</button><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("feature")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.goldSoft, color: ui.gold }}>{t("设为精选", "Feature")}</button><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("unfeature")} className="rounded-xl px-2 py-2 text-xs font-bold" style={{ background: ui.surfaceAlt, color: ui.muted }}>{t("取消精选", "Unfeature")}</button></div>
+          <div className="mt-2 flex gap-2"><input aria-label={t("批量排序起始值", "Batch order starting value")} type="number" min="0" value={batchOrder} onChange={(event) => setBatchOrder(event.target.value)} className="min-w-0 flex-1 rounded-xl border px-3 py-2 text-xs" style={{ background: ui.surface, color: ui.text, borderColor: ui.line }} /><button type="button" disabled={busy} onClick={() => void applyBatchUpdate("order")} className="rounded-xl px-3 py-2 text-xs font-bold" style={{ background: ui.primarySoft, color: ui.primary }}>{t("批量排序", "Order")}</button></div>
+        </div>}
         {loadError && <div role="alert" className="rounded-xl border p-4 text-sm" style={{ borderColor: ui.danger, color: ui.danger }}><p>{loadError}</p><button type="button" onClick={() => void loadTemplates()} className="mt-2 underline">{t("重新加载", "Retry")}</button></div>}
         <div className="max-h-[75vh] space-y-2 overflow-y-auto pr-1">
           {loading && <p className="py-4 text-sm" style={{ color: ui.faint }}>{t("正在读取模板…", "Loading templates…")}</p>}
           {!loading && !loadError && filteredTemplates.length === 0 && <p className="rounded-2xl p-5 text-sm" style={{ background: ui.surface, color: ui.faint }}>{t("没有符合条件的模板，可以新建一个。", "No templates match. Create a new template to begin.")}</p>}
-          {filteredTemplates.map((template) => <button key={template.id} type="button" disabled={busy} onClick={() => { setDraft(toTemplateDraft(template)); setTagInput(""); }} className="w-full rounded-2xl border p-4 text-left disabled:opacity-50" style={{ background: String(template.id) === String(draft.id) ? ui.surfaceHigh : ui.surface, borderColor: String(template.id) === String(draft.id) ? ui.primary : ui.line }}>
-            <div className="flex items-start justify-between gap-2"><strong className="text-sm" style={{ color: ui.text }}>{template.scene_name}</strong>{template.is_featured && <span className="shrink-0 text-xs" style={{ color: ui.gold }}>{t("精选", "Featured")}</span>}</div>
+          {filteredTemplates.map((template) => <div key={template.id} className="flex w-full rounded-2xl border p-1 text-left disabled:opacity-50" style={{ background: String(template.id) === String(draft.id) ? ui.surfaceHigh : ui.surface, borderColor: String(template.id) === String(draft.id) ? ui.primary : ui.line }}>
+            {isManagement && <label className="flex shrink-0 cursor-pointer items-center px-2"><input type="checkbox" checked={selectedTemplateIds.includes(String(template.id))} onChange={() => toggleTemplateSelection(template.id)} aria-label={t(`选择 ${template.scene_name}`, `Select ${template.scene_name}`)} /></label>}
+            <button type="button" disabled={busy} onClick={() => { setDraft(toTemplateDraft(template)); setTagInput(""); }} className="min-w-0 flex-1 rounded-xl p-3 text-left disabled:opacity-50">
+            <div className="mb-3 flex gap-3"><div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl" style={{ background: ui.surfaceAlt }}>{template.preview_image_url ? <OssImage src={template.preview_image_url} authorize={!isAnonymousTemplateAsset(template)} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-xs" style={{ color: ui.faint }}>{template.output_type === "video" ? "VIDEO" : "IMAGE"}</div>}</div>
+            <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2"><strong className="text-sm" style={{ color: ui.text }}>{template.scene_name}</strong><span className="flex shrink-0 gap-1">{template.is_featured && <span className="text-xs" style={{ color: ui.gold }}>{t("精选", "Featured")}</span>}<span className="text-xs" style={{ color: template.is_active === false ? ui.danger : ui.faint }}>{statusLabel(template)}</span></span></div>
             <p className="mt-2 text-xs" style={{ color: ui.faint }}>{template.output_type === "video" ? t("视频", "Video") : t("图片", "Image")} · {statusLabel(template)} · 18 {t("积分", "points")}</p>
-            {template.tags?.length > 0 && <p className="mt-2 truncate text-xs" style={{ color: ui.muted }}>{template.tags.join(" · ")}</p>}
-          </button>)}
+            <p className="mt-2 text-xs" style={{ color: ui.faint }}>{t("列表", "List")} #{Number(template.display_order || 0)}{template.is_featured ? ` · ${t("精选", "Featured")} #${Number(template.featured_order || 0)}` : ""}</p>
+            {template.tags?.length > 0 && <p className="mt-1 truncate text-xs" style={{ color: ui.muted }}>{template.tags.join(" · ")}</p>}
+            </div></div>
+            </button></div>)}
         </div>
       </section>
 

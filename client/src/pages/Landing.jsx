@@ -157,7 +157,7 @@ export default function Landing() {
     // A blank hero prompt means the visitor is choosing a creation direction.
     // Keep a typed request on the existing Agent path so no creative intent is lost.
     if (!prompt.trim()) {
-      navigate("/create");
+      navigate("/design");
       return;
     }
     enterAgent(prompt);
@@ -194,8 +194,8 @@ export default function Landing() {
             >
               {isZh ? "EN" : "中"}
             </button>
-            <button type="button" className="landing-enter" onClick={() => navigate("/create")}>
-              {t("选择创作方式", "Choose how to create")}
+            <button type="button" className="landing-enter" onClick={() => navigate("/design")}>
+              {t("开始实体设计", "Start physical design")}
               <ArrowRight size={15} />
             </button>
           </div>
